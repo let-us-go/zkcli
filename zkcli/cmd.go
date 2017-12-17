@@ -23,29 +23,29 @@ type Cmd struct {
 
 func ParseCmd(cmd string) *Cmd {
 	arr := strings.Split(cmd, " ")
-	cmds := []string{}
+	options := make([]string, 0)
 	for _, cmd := range arr {
 		if cmd != "" {
-			cmds = append(cmds, cmd)
+			options = append(options, cmd)
 		}
 	}
-	if len(cmds) == 0 {
+	if len(options) == 0 {
 		return nil
 	}
 
 	return &Cmd{
-		Name:    cmds[0],
-		Options: cmds[1:],
+		Name:    options[0],
+		Options: options[1:],
 	}
 }
 
 func (c *Cmd) ls(conn *zk.Conn) (err error) {
-	path := "/"
+	p := "/"
 	options := c.Options
 	if len(options) > 0 {
-		path = options[0]
+		p = options[0]
 	}
-	children, _, err := conn.Children(path)
+	children, _, err := conn.Children(p)
 	if err != nil {
 		return
 	}
@@ -54,12 +54,12 @@ func (c *Cmd) ls(conn *zk.Conn) (err error) {
 }
 
 func (c *Cmd) get(conn *zk.Conn) (err error) {
-	path := "/"
+	p := "/"
 	options := c.Options
 	if len(options) > 0 {
-		path = options[0]
+		p = options[0]
 	}
-	value, stat, err := conn.Get(path)
+	value, stat, err := conn.Get(p)
 	if err != nil {
 		return
 	}
@@ -68,34 +68,36 @@ func (c *Cmd) get(conn *zk.Conn) (err error) {
 }
 
 func (c *Cmd) create(conn *zk.Conn) (err error) {
-	path := "/"
+	p := "/"
 	data := ""
 	options := c.Options
 	if len(options) > 0 {
-		path = options[0]
+		p = options[0]
 		if len(options) > 1 {
 			data = options[1]
 		}
 	}
-	_, err = conn.Create(path, []byte(data), flag, acl)
+	_, err = conn.Create(p, []byte(data), flag, acl)
 	if err != nil {
 		return
 	}
-	fmt.Printf("Created %s\n", path)
+	fmt.Printf("Created %s\n", p)
+	root, _ := splitPath(p)
+	suggestCache.del(root)
 	return
 }
 
 func (c *Cmd) set(conn *zk.Conn) (err error) {
-	path := "/"
+	p := "/"
 	data := ""
 	options := c.Options
 	if len(options) > 0 {
-		path = options[0]
+		p = options[0]
 		if len(options) > 1 {
 			data = options[1]
 		}
 	}
-	stat, err := conn.Set(path, []byte(data), -1)
+	stat, err := conn.Set(p, []byte(data), -1)
 	if err != nil {
 		return
 	}
@@ -104,16 +106,18 @@ func (c *Cmd) set(conn *zk.Conn) (err error) {
 }
 
 func (c *Cmd) delete(conn *zk.Conn) (err error) {
-	path := "/"
+	p := "/"
 	options := c.Options
 	if len(options) > 0 {
-		path = options[0]
+		p = options[0]
 	}
-	err = conn.Delete(path, -1)
+	err = conn.Delete(p, -1)
 	if err != nil {
 		return
 	}
-	fmt.Printf("Deleted %s\n", path)
+	fmt.Printf("Deleted %s\n", p)
+	root, _ := splitPath(p)
+	suggestCache.del(root)
 	return
 }
 
