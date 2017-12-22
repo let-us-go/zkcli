@@ -16,28 +16,31 @@ var commands = []prompt.Suggest{
 	{Text: "create", Description: "Create a node"},
 	{Text: "set", Description: "Update a node"},
 	{Text: "delete", Description: "Delete a node"},
+	{Text: "close", Description: "Close connection"},
+	{Text: "connect", Description: "Connect servers"},
 	{Text: "quit", Description: "Exit this program"},
 	{Text: "exit", Description: "Exit this program"},
 }
 
 var suggestCache = newSuggestCache()
 
-func GetCompleter(conn *zk.Conn) func(d prompt.Document) []prompt.Suggest {
+func GetCompleter(cmd *Cmd) func(d prompt.Document) []prompt.Suggest {
 	return func(d prompt.Document) []prompt.Suggest {
 		if d.TextBeforeCursor() == "" {
 			return []prompt.Suggest{}
 		}
 		args := strings.Split(d.TextBeforeCursor(), " ")
-		return argumentsCompleter(excludeOptions(args), conn)
+		return argumentsCompleter(excludeOptions(args), cmd)
 	}
 }
 
-func argumentsCompleter(args []string, conn *zk.Conn) []prompt.Suggest {
+func argumentsCompleter(args []string, cmd *Cmd) []prompt.Suggest {
 	if len(args) <= 1 {
 		return prompt.FilterHasPrefix(commands, args[0], true)
 	}
 
 	first := args[0]
+	conn := cmd.Conn
 	switch first {
 	case "get", "ls", "create", "set", "delete":
 		p := args[1]

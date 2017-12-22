@@ -19,24 +19,30 @@ type Cmd struct {
 	Options     []string
 	ExitWhenErr bool
 	Conn        *zk.Conn
+	Config      *Config
 }
 
-func ParseCmd(cmd string) *Cmd {
-	arr := strings.Split(cmd, " ")
-	options := make([]string, 0)
-	for _, cmd := range arr {
+func NewCmd(name string, options []string, conn *zk.Conn, config *Config) *Cmd {
+	return &Cmd{
+		Name:    name,
+		Options: options,
+		Conn:    conn,
+		Config:  config,
+	}
+}
+
+func ParseCmd(cmd string) (name string, options []string) {
+	args := make([]string, 0)
+	for _, cmd := range strings.Split(cmd, " ") {
 		if cmd != "" {
-			options = append(options, cmd)
+			args = append(args, cmd)
 		}
 	}
-	if len(options) == 0 {
-		return nil
+	if len(args) == 0 {
+		return
 	}
 
-	return &Cmd{
-		Name:    options[0],
-		Options: options[1:],
-	}
+	return args[0], args[1:]
 }
 
 func (c *Cmd) ls(conn *zk.Conn) (err error) {
@@ -121,6 +127,11 @@ func (c *Cmd) delete(conn *zk.Conn) (err error) {
 	return
 }
 
+func (c *Cmd) connected() bool {
+	state := c.Conn.State()
+	return state == zk.StateConnected
+}
+
 func (c *Cmd) run() (err error) {
 	switch c.Name {
 	case "ls":
@@ -133,6 +144,20 @@ func (c *Cmd) run() (err error) {
 		return c.set(c.Conn)
 	case "delete":
 		return c.delete(c.Conn)
+	case "close":
+		c.Conn.Close()
+		if !c.connected() {
+			fmt.Println("Closed")
+		}
+		return
+	case "connect":
+		conn, err := c.Config.Connect()
+		if err != nil {
+			return err
+		}
+		c.Conn = conn
+		fmt.Println("Connected")
+		return err
 	default:
 		return ErrUnknownCmd
 	}
@@ -158,9 +183,9 @@ func (c *Cmd) Run() {
 func printHelp() {
 	fmt.Println(`get path
 ls path
-create path data acl
-set path data [version]
-delete path [version]
+create path data
+set path data
+delete path
 quit
 close
 connect host:port
@@ -171,13 +196,14 @@ func printRunError(err error) {
 	fmt.Println(err)
 }
 
-func GetExecutor(conn *zk.Conn) func(s string) {
+func GetExecutor(cmd *Cmd) func(s string) {
 	return func(s string) {
-		c := ParseCmd(s)
-		c.Conn = conn
-		if c.Name == "quit" || c.Name == "exit" {
+		name, options := ParseCmd(s)
+		cmd.Name = name
+		cmd.Options = options
+		if name == "quit" || name == "exit" {
 			os.Exit(0)
 		}
-		c.Run()
+		cmd.Run()
 	}
 }
