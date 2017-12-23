@@ -5,6 +5,9 @@
 
 A interactive Zookeeper client.
 
+![zkcli](./zkcli.gif)
+
+
 ## Install
 
 ### Mac (Homebrew)
@@ -30,9 +33,6 @@ Or [download a pre-built binary](https://github.com/let-us-go/zkcli/releases) fo
 
 
 ## Usage
-
-![zkcli](./zkcli.gif)
-
 
 ```shell
 $ zkcli ls /test
