@@ -20,8 +20,12 @@ func main() {
 	args := flag.Args()
 
 	config := zkcli.NewConfig(strings.Split(*servers, ","))
-	config.Username = *username
-	config.Password = *password
+	if *username != "" && *password != "" {
+		auth := zkcli.NewAuth(
+			"digest", fmt.Sprintf("%s:%s", *username, *password),
+		)
+		config.Auth = auth
+	}
 	conn, err := config.Connect()
 	if err != nil {
 		fmt.Printf("%s\n", err)

@@ -2,12 +2,10 @@ package zkcli
 
 import (
 	"fmt"
+	"path"
 	"strings"
 
-	"path"
-
 	"github.com/c-bata/go-prompt"
-	"github.com/samuel/go-zookeeper/zk"
 )
 
 var commands = []prompt.Suggest{
@@ -18,7 +16,7 @@ var commands = []prompt.Suggest{
 	{Text: "delete", Description: "Delete a node"},
 	{Text: "close", Description: "Close connection"},
 	{Text: "connect", Description: "Connect servers"},
-	{Text: "quit", Description: "Exit this program"},
+	{Text: "addauth", Description: "Add auth info"},
 	{Text: "exit", Description: "Exit this program"},
 }
 
@@ -40,27 +38,60 @@ func argumentsCompleter(args []string, cmd *Cmd) []prompt.Suggest {
 	}
 
 	first := args[0]
-	conn := cmd.Conn
 	switch first {
 	case "get", "ls", "create", "set", "delete":
 		p := args[1]
 		if len(args) > 2 {
-			return []prompt.Suggest{}
+			switch first {
+			case "create", "set":
+				if len(args) < 4 {
+					return []prompt.Suggest{
+						{Text: "data"},
+					}
+				}
+			default:
+				return []prompt.Suggest{}
+			}
 		}
 		root, _ := splitPath(p)
-		return prompt.FilterContains(getChildrenCompletions(conn, root), p, true)
+		return prompt.FilterContains(getChildrenCompletions(cmd, root), p, true)
+	case "connect":
+		servers := args[1]
+		if servers == "" {
+			return []prompt.Suggest{
+				{Text: "host:port"},
+			}
+		}
+	case "addauth":
+		scheme := args[1]
+		if len(args) > 2 {
+			if len(args) == 3 {
+				return []prompt.Suggest{
+					{Text: "auth"},
+				}
+			}
+			return []prompt.Suggest{}
+		}
+		return prompt.FilterContains([]prompt.Suggest{
+			{Text: "digest"},
+		}, scheme, true)
+
 	default:
 		return []prompt.Suggest{}
 	}
 	return []prompt.Suggest{}
 }
 
-func getChildrenCompletions(conn *zk.Conn, root string) []prompt.Suggest {
+func getChildrenCompletions(cmd *Cmd, root string) []prompt.Suggest {
 	if value, ok := suggestCache.get(root); ok {
 		return value
 	}
 
-	children, _, err := conn.Children(root)
+	if !cmd.connected() {
+		return []prompt.Suggest{}
+	}
+
+	children, _, err := cmd.Conn.Children(root)
 	if err != nil || len(children) == 0 {
 		return []prompt.Suggest{}
 	}

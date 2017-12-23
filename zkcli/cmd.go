@@ -45,13 +45,18 @@ func ParseCmd(cmd string) (name string, options []string) {
 	return args[0], args[1:]
 }
 
-func (c *Cmd) ls(conn *zk.Conn) (err error) {
+func (c *Cmd) ls() (err error) {
+	err = c.checkConn()
+	if err != nil {
+		return
+	}
+
 	p := "/"
 	options := c.Options
 	if len(options) > 0 {
 		p = options[0]
 	}
-	children, _, err := conn.Children(p)
+	children, _, err := c.Conn.Children(p)
 	if err != nil {
 		return
 	}
@@ -59,13 +64,18 @@ func (c *Cmd) ls(conn *zk.Conn) (err error) {
 	return
 }
 
-func (c *Cmd) get(conn *zk.Conn) (err error) {
+func (c *Cmd) get() (err error) {
+	err = c.checkConn()
+	if err != nil {
+		return
+	}
+
 	p := "/"
 	options := c.Options
 	if len(options) > 0 {
 		p = options[0]
 	}
-	value, stat, err := conn.Get(p)
+	value, stat, err := c.Conn.Get(p)
 	if err != nil {
 		return
 	}
@@ -73,7 +83,12 @@ func (c *Cmd) get(conn *zk.Conn) (err error) {
 	return
 }
 
-func (c *Cmd) create(conn *zk.Conn) (err error) {
+func (c *Cmd) create() (err error) {
+	err = c.checkConn()
+	if err != nil {
+		return
+	}
+
 	p := "/"
 	data := ""
 	options := c.Options
@@ -83,7 +98,7 @@ func (c *Cmd) create(conn *zk.Conn) (err error) {
 			data = options[1]
 		}
 	}
-	_, err = conn.Create(p, []byte(data), flag, acl)
+	_, err = c.Conn.Create(p, []byte(data), flag, acl)
 	if err != nil {
 		return
 	}
@@ -93,7 +108,12 @@ func (c *Cmd) create(conn *zk.Conn) (err error) {
 	return
 }
 
-func (c *Cmd) set(conn *zk.Conn) (err error) {
+func (c *Cmd) set() (err error) {
+	err = c.checkConn()
+	if err != nil {
+		return
+	}
+
 	p := "/"
 	data := ""
 	options := c.Options
@@ -103,7 +123,7 @@ func (c *Cmd) set(conn *zk.Conn) (err error) {
 			data = options[1]
 		}
 	}
-	stat, err := conn.Set(p, []byte(data), -1)
+	stat, err := c.Conn.Set(p, []byte(data), -1)
 	if err != nil {
 		return
 	}
@@ -111,13 +131,18 @@ func (c *Cmd) set(conn *zk.Conn) (err error) {
 	return
 }
 
-func (c *Cmd) delete(conn *zk.Conn) (err error) {
+func (c *Cmd) delete() (err error) {
+	err = c.checkConn()
+	if err != nil {
+		return
+	}
+
 	p := "/"
 	options := c.Options
 	if len(options) > 0 {
 		p = options[0]
 	}
-	err = conn.Delete(p, -1)
+	err = c.Conn.Delete(p, -1)
 	if err != nil {
 		return
 	}
@@ -127,37 +152,92 @@ func (c *Cmd) delete(conn *zk.Conn) (err error) {
 	return
 }
 
+func (c *Cmd) close() (err error) {
+	err = c.checkConn()
+	if err != nil {
+		return
+	}
+
+	c.Conn.Close()
+	if !c.connected() {
+		fmt.Println("Closed")
+	}
+	return
+}
+
+func (c *Cmd) connect() (err error) {
+	options := c.Options
+	var conn *zk.Conn
+	if len(options) > 0 {
+		cf := NewConfig(strings.Split(options[0], ","))
+		conn, err = cf.Connect()
+		if err != nil {
+			return err
+		}
+	} else {
+		conn, err = c.Config.Connect()
+		if err != nil {
+			return err
+		}
+	}
+	if c.connected() {
+		c.Conn.Close()
+	}
+	c.Conn = conn
+	fmt.Println("Connected")
+	return err
+}
+
+func (c *Cmd) addAuth() (err error) {
+	err = c.checkConn()
+	if err != nil {
+		return
+	}
+
+	options := c.Options
+	if len(options) < 2 {
+		return errors.New("addauth <scheme> <auth>")
+	}
+	scheme := options[0]
+	auth := options[1]
+	err = c.Conn.AddAuth(scheme, []byte(auth))
+	if err != nil {
+		return
+	}
+	fmt.Println("Added")
+	return err
+}
+
 func (c *Cmd) connected() bool {
 	state := c.Conn.State()
-	return state == zk.StateConnected
+	return state == zk.StateConnected || state == zk.StateHasSession
+}
+
+func (c *Cmd) checkConn() (err error) {
+	if !c.connected() {
+		err = errors.New("connection is disconnected")
+	}
+	return
 }
 
 func (c *Cmd) run() (err error) {
 	switch c.Name {
 	case "ls":
-		return c.ls(c.Conn)
+		return c.ls()
 	case "get":
-		return c.get(c.Conn)
+		return c.get()
 	case "create":
-		return c.create(c.Conn)
+		return c.create()
 	case "set":
-		return c.set(c.Conn)
+		return c.set()
 	case "delete":
-		return c.delete(c.Conn)
+		return c.delete()
 	case "close":
-		c.Conn.Close()
-		if !c.connected() {
-			fmt.Println("Closed")
-		}
-		return
+		return c.close()
 	case "connect":
-		conn, err := c.Config.Connect()
-		if err != nil {
-			return err
-		}
-		c.Conn = conn
-		fmt.Println("Connected")
-		return err
+		return c.connect()
+	case "addauth":
+		return c.addAuth()
 	default:
 		return ErrUnknownCmd
 	}
@@ -181,15 +261,15 @@ func (c *Cmd) Run() {
 }
 
 func printHelp() {
-	fmt.Println(`get path
-ls path
-create path data
-set path data
-delete path
-quit
+	fmt.Println(`get <path>
+ls <path>
+create <path> [<data>]
+set <path> [<data>]
+delete <path>
+connect <host:port>
+addauth <scheme> <auth>
 close
-connect host:port
-addauth scheme auth`)
+exit`)
 }
 
 func printRunError(err error) {
@@ -201,7 +281,7 @@ func GetExecutor(cmd *Cmd) func(s string) {
 		name, options := ParseCmd(s)
 		cmd.Name = name
 		cmd.Options = options
-		if name == "quit" || name == "exit" {
+		if name == "exit" {
 			os.Exit(0)
 		}
 		cmd.Run()

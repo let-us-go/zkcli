@@ -10,9 +10,8 @@ import (
 )
 
 type Config struct {
-	Servers  []string
-	Username string
-	Password string
+	Servers []string
+	Auth    *Auth
 }
 
 func NewConfig(Servers []string) *Config {
@@ -26,15 +25,11 @@ type Auth struct {
 	Payload []byte
 }
 
-func NewAuth(username, password string) *Auth {
+func NewAuth(scheme, auth string) *Auth {
 	return &Auth{
-		Scheme:  "digest",
-		Payload: []byte(fmt.Sprintf("%s:%s", username, password)),
+		Scheme:  scheme,
+		Payload: []byte(auth),
 	}
-}
-
-func (c *Config) GetAuth() *Auth {
-	return NewAuth(c.Username, c.Password)
 }
 
 func (c *Config) Connect() (conn *zk.Conn, err error) {
@@ -42,9 +37,12 @@ func (c *Config) Connect() (conn *zk.Conn, err error) {
 	if err != nil {
 		return
 	}
-	if c.Username != "" && c.Password != "" {
-		auth := c.GetAuth()
-		conn.AddAuth(auth.Scheme, auth.Payload)
+	if c.Auth != nil {
+		auth := c.Auth
+		err = conn.AddAuth(auth.Scheme, auth.Payload)
+		if err != nil {
+			return
+		}
 	}
 	n := 0
 	failed := false
