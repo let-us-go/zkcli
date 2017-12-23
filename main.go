@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/c-bata/go-prompt"
-	"github.com/let-us-go/zkcli/zkcli"
+	"github.com/let-us-go/zkcli/core"
 )
 
 const version = "0.1.0"
@@ -19,9 +19,9 @@ func main() {
 	flag.Parse()
 	args := flag.Args()
 
-	config := zkcli.NewConfig(strings.Split(*servers, ","))
+	config := core.NewConfig(strings.Split(*servers, ","))
 	if *username != "" && *password != "" {
-		auth := zkcli.NewAuth(
+		auth := core.NewAuth(
 			"digest", fmt.Sprintf("%s:%s", *username, *password),
 		)
 		config.Auth = auth
@@ -32,8 +32,8 @@ func main() {
 		os.Exit(1)
 	}
 
-	name, options := zkcli.ParseCmd(strings.Join(args, " "))
-	cmd := zkcli.NewCmd(name, options, conn, config)
+	name, options := core.ParseCmd(strings.Join(args, " "))
+	cmd := core.NewCmd(name, options, conn, config)
 	if len(args) > 0 {
 		cmd.ExitWhenErr = true
 		cmd.Run()
@@ -41,9 +41,9 @@ func main() {
 	}
 
 	p := prompt.New(
-		zkcli.GetExecutor(cmd),
-		zkcli.GetCompleter(cmd),
-		prompt.OptionTitle("zkcli: interactive zookeeper client"),
+		core.GetExecutor(cmd),
+		core.GetCompleter(cmd),
+		prompt.OptionTitle("zkcli: A interactive Zookeeper client"),
 		prompt.OptionPrefix(">>> "),
 	)
 	p.Run()
