@@ -56,6 +56,7 @@ func (c *Cmd) ls() (err error) {
 	if len(options) > 0 {
 		p = options[0]
 	}
+	cleanPath(p)
 	children, _, err := c.Conn.Children(p)
 	if err != nil {
 		return
@@ -75,6 +76,7 @@ func (c *Cmd) get() (err error) {
 	if len(options) > 0 {
 		p = options[0]
 	}
+	p = cleanPath(p)
 	value, stat, err := c.Conn.Get(p)
 	if err != nil {
 		return
@@ -98,6 +100,7 @@ func (c *Cmd) create() (err error) {
 			data = options[1]
 		}
 	}
+	cleanPath(p)
 	_, err = c.Conn.Create(p, []byte(data), flag, acl)
 	if err != nil {
 		return
@@ -123,6 +126,7 @@ func (c *Cmd) set() (err error) {
 			data = options[1]
 		}
 	}
+	cleanPath(p)
 	stat, err := c.Conn.Set(p, []byte(data), -1)
 	if err != nil {
 		return
@@ -142,6 +146,7 @@ func (c *Cmd) delete() (err error) {
 	if len(options) > 0 {
 		p = options[0]
 	}
+	cleanPath(p)
 	err = c.Conn.Delete(p, -1)
 	if err != nil {
 		return
@@ -274,6 +279,13 @@ exit`)
 
 func printRunError(err error) {
 	fmt.Println(err)
+}
+
+func cleanPath(p string) string {
+	if p == "/" {
+		return p
+	}
+	return strings.TrimRight(p, "/")
 }
 
 func GetExecutor(cmd *Cmd) func(s string) {
