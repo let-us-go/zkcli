@@ -1,4 +1,4 @@
-package zkcli
+package core
 
 import (
 	"errors"

@@ -1,4 +1,4 @@
-package zkcli
+package core
 
 import "github.com/c-bata/go-prompt"
 
