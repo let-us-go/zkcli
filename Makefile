@@ -1,7 +1,7 @@
 .PHONY: help
 help:
 	@echo "lint             run lint"
-	@echo "release-all        compile for all platforms "
+	@echo "release-all      compile for all platforms "
 
 PROJECT=zkcli
 VERSION=$(shell cat main.go |grep 'version = "[0-9]\+.[0-9]\+.[0-9]\+"' | awk -F '"' '{print $$2}')
