@@ -10,14 +10,24 @@ import (
 	"github.com/let-us-go/zkcli/core"
 )
 
+var gitCommit = "unknown"
+var built = "unknown"
+
 const version = "0.1.0"
 
 func main() {
 	servers := flag.String("s", "127.0.0.1:2181", "Servers")
 	username := flag.String("u", "", "Username")
 	password := flag.String("p", "", "Password")
+	showVersion := flag.Bool("version", false, "Show version info")
 	flag.Parse()
 	args := flag.Args()
+
+	if *showVersion {
+		fmt.Printf("Version:\t%s\nGit commit:\t%s\nBuilt: %s\n",
+			version, gitCommit, built)
+		os.Exit(0)
+	}
 
 	config := core.NewConfig(strings.Split(*servers, ","))
 	if *username != "" && *password != "" {
