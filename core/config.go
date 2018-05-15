@@ -1,12 +1,12 @@
 package core
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 	"time"
 
 	"github.com/samuel/go-zookeeper/zk"
-	"qiniupkg.com/x/errors.v7"
 )
 
 type Config struct {
