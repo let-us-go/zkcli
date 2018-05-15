@@ -31,6 +31,7 @@ func main() {
 		fmt.Printf("%s\n", err)
 		os.Exit(1)
 	}
+	defer conn.Close()
 
 	name, options := core.ParseCmd(strings.Join(args, " "))
 	cmd := core.NewCmd(name, options, conn, config)
