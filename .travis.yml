@@ -2,8 +2,10 @@ language: go
 go:
   - 1.8
   - 1.9
+  - '1.10'
 
 sudo: false
 
 install:
-  - go get .
+  - go build
+  - ./zkcli -version
