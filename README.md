@@ -26,7 +26,7 @@ go install github.com/let-us-go/zkcli
 ### Build
 
 ```
-make release
+make release-all
 ```
 
 Or [download a pre-built binary](https://github.com/let-us-go/zkcli/releases) for Linux or macOS/OSX.
