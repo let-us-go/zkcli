@@ -2,6 +2,7 @@
 help:
 	@echo "lint             run lint"
 	@echo "release-all      compile for all platforms "
+	@echo "build            build"
 
 PROJECT=zkcli
 VERSION=$(shell cat main.go |grep 'version = "[0-9]\+.[0-9]\+.[0-9]\+"' | awk -F '"' '{print $$2}')
@@ -34,6 +35,10 @@ release-all:
 	@$(MAKE) release GOOS=linux   GOARCH=amd64
 	@$(MAKE) release GOOS=linux   GOARCH=386
 	@$(MAKE) release GOOS=darwin  GOARCH=amd64
+
+.PHONY: build
+build:
+	go build
 
 .PHONY: lint
 lint:
