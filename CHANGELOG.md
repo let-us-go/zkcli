@@ -1,6 +1,23 @@
 # Changelog
 
 
+## [0.3.0] (2018-09-16)
+
+### New Features
+
+* Supports scrollbar when there are too many matched suggestions
+
+### Improve
+
+* Revert #7: Ignored with the suffix slash of zpath when completion
+* Remove / from end of path when fetch data from zookeeper
+
+### Internal changes
+
+* Change to use go mod
+* Upgrade go-prompt to v0.2.2 and go-zookeeper to v0.0.0-20180130194729-c4fab1ac1bec
+
+
 ## [0.2.0] (2018-05-30)
 
 ### New Features
@@ -27,3 +44,4 @@ Built: 2018-05-30T13:44:21+0000
 
 
 [0.2.0]: https://github.com/let-us-go/zkcli/compare/v0.1.0...v0.2.0
+[0.3.0]: https://github.com/let-us-go/zkcli/compare/v0.2.0...v0.3.0

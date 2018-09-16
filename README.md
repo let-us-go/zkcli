@@ -54,3 +54,16 @@ close
 exit
 >>>
 ```
+
+
+## Develop
+
+```
+$ GO111MODULE=on go get xxx
+
+$ GO111MODULE=on go mod tidy
+$ GO111MODULE=on go mod verify
+
+$ make build
+$ make release-all
+```
