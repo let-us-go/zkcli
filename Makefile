@@ -17,6 +17,7 @@ ARCNAME=$(PROJECT)-$(VERSION)-$(GOOS)-$(GOARCH)
 RELDIR=$(ARCNAME)
 
 DISTDIR=dist
+export GO111MODULE=on
 
 .PHONY: release
 release:
