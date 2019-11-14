@@ -20,6 +20,7 @@ func main() {
 	username := flag.String("u", "", "Username")
 	password := flag.String("p", "", "Password")
 	showVersion := flag.Bool("version", false, "Show version info")
+	verboseLog := flag.Bool("v", false, "Set to true if want to enable zk log, usefull for diagnose zk problems")
 	flag.Parse()
 	args := flag.Args()
 
@@ -29,7 +30,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	config := core.NewConfig(strings.Split(*servers, ","))
+	config := core.NewConfig(strings.Split(*servers, ","), !*verboseLog)
 	if *username != "" && *password != "" {
 		auth := core.NewAuth(
 			"digest", fmt.Sprintf("%s:%s", *username, *password),
