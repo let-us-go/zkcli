@@ -20,7 +20,7 @@ func main() {
 	username := flag.String("u", "", "Username")
 	password := flag.String("p", "", "Password")
 	showVersion := flag.Bool("version", false, "Show version info")
-	verboseLog := flag.Bool("v", false, "Set to true if want to disable zk log, usefull for use the result in shell script")
+	verboseLog := flag.Bool("v", false, "Set to true if want to enable zk log, usefull for diagnose zk problems")
 	flag.Parse()
 	args := flag.Args()
 
