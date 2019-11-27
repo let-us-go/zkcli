@@ -9,5 +9,3 @@ require (
 	github.com/samuel/go-zookeeper v0.0.0-20190923202752-2cc03de413da
 	golang.org/x/sys v0.0.0-20191127021746-63cb32ae39b2 // indirect
 )
-
-go 1.13
