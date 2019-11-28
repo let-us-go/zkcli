@@ -1,13 +1,15 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/c-bata/go-prompt"
 	"github.com/let-us-go/zkcli/core"
+	homedir "github.com/mitchellh/go-homedir"
+	"github.com/namsral/flag"
 )
 
 var gitCommit = "unknown"
@@ -21,6 +23,12 @@ func main() {
 	password := flag.String("p", "", "Password")
 	showVersion := flag.Bool("version", false, "Show version info")
 	verboseLog := flag.Bool("v", false, "Set to true if want to enable zk log, usefull for diagnose zk problems")
+	homePath, _ := homedir.Dir()
+	defaultConf := filepath.Join(homePath, ".config/zkcli.conf")
+	if _, err := os.Stat(defaultConf); err != nil {
+		defaultConf = ""
+	}
+	flag.String(flag.DefaultConfigFlagname, defaultConf, "path to config file")
 	flag.Parse()
 	args := flag.Args()
 

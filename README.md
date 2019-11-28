@@ -55,6 +55,11 @@ exit
 >>>
 ```
 
+```shell
+$ # zkcli will try to read ~/.config/zkcli.conf as default configuration if the file exists
+$ zkcli -h # show help
+```
+
 
 ## Develop
 
