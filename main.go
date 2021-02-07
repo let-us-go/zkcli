@@ -15,7 +15,7 @@ import (
 var gitCommit = "unknown"
 var built = "unknown"
 
-const version = "0.3.0"
+const version = "0.3.1"
 
 func main() {
 	servers := flag.String("s", "127.0.0.1:2181", "Servers")

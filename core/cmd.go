@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/samuel/go-zookeeper/zk"
+	"github.com/go-zookeeper/zk"
 )
 
 const flag int32 = 0

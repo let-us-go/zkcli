@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1] (2021-02-03)
+
+### Internal changes
+
+* Switch from unmaintained samuel/go-zookeeper/zk library to the new official
+  upstream go-zookeeper/zk, version 1.0.2. Fixes connection and authentication
+  bugs.
 
 ## [0.3.0] (2018-09-16)
 
