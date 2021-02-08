@@ -1,9 +1,0 @@
-language: go
-go:
-  - '1.11'
-
-sudo: false
-
-install:
-  - make build
-  - ./zkcli -version
