@@ -1,6 +1,15 @@
 # Changelog
 
-## [0.3.1] (2021-02-03)
+## [0.4.0] (2021-02-08)
+
+### New Features
+
+* Support configuration file:
+  * zkcli will try to read ~/.config/zkcli.conf as default configuration(can be changed with `-config` argument) if the file exists.
+
+### Changes
+
+* No longer output logs from zk library. You can run command with `-v` argument to output logs.
 
 ### Internal changes
 
@@ -52,3 +61,4 @@ Built: 2018-05-30T13:44:21+0000
 
 [0.2.0]: https://github.com/let-us-go/zkcli/compare/v0.1.0...v0.2.0
 [0.3.0]: https://github.com/let-us-go/zkcli/compare/v0.2.0...v0.3.0
+[0.4.0]: https://github.com/let-us-go/zkcli/compare/v0.3.0...v0.4.0

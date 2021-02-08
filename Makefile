@@ -25,7 +25,7 @@ release:
 	rm -rf $(DISTDIR)/$(RELDIR)
 	mkdir -p $(DISTDIR)/$(RELDIR)
 	go clean
-	GOOS=$(GOOS) GOARCH=$(GOARCH) go build -ldflags ${LDFLAGS}
+	GOOS=$(GOOS) GOARCH=$(GOARCH) make build
 	cp $(PROJECT)$(SUFFIX_EXE) $(DISTDIR)/$(RELDIR)/
 	tar czf $(DISTDIR)/$(ARCNAME).tar.gz -C $(DISTDIR) $(RELDIR)
 	go clean
@@ -34,11 +34,12 @@ release:
 release-all:
 	@$(MAKE) release GOOS=linux   GOARCH=amd64
 	@$(MAKE) release GOOS=linux   GOARCH=386
+	@$(MAKE) release GOOS=linux   GOARCH=arm64
 	@$(MAKE) release GOOS=darwin  GOARCH=amd64
 
 .PHONY: build
 build:
-	go build
+	CGO_ENABLED=0 go build -ldflags ${LDFLAGS}
 
 .PHONY: lint
 lint:
