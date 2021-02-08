@@ -6,17 +6,20 @@ import (
 	"strings"
 	"time"
 
-	"github.com/samuel/go-zookeeper/zk"
+	"github.com/go-zookeeper/zk"
 )
 
 type Config struct {
 	Servers []string
 	Auth    *Auth
+
+	SlientLog bool
 }
 
-func NewConfig(Servers []string) *Config {
+func NewConfig(Servers []string, slientLog bool) *Config {
 	return &Config{
-		Servers: Servers,
+		Servers:   Servers,
+		SlientLog: slientLog,
 	}
 }
 
@@ -32,8 +35,18 @@ func NewAuth(scheme, auth string) *Auth {
 	}
 }
 
+type emptyLogger struct{}
+
+func (emptyLogger) Printf(format string, a ...interface{}) {
+	// do nothing
+}
+
 func (c *Config) Connect() (conn *zk.Conn, err error) {
-	conn, e, err := zk.Connect(c.Servers, time.Second)
+	logger := zk.WithLogger(zk.DefaultLogger)
+	if c.SlientLog {
+		logger = zk.WithLogger(emptyLogger{})
+	}
+	conn, e, err := zk.Connect(c.Servers, time.Second, logger)
 	if err != nil {
 		return
 	}

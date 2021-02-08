@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/samuel/go-zookeeper/zk"
+	"github.com/go-zookeeper/zk"
 )
 
 const flag int32 = 0
@@ -174,7 +174,7 @@ func (c *Cmd) connect() (err error) {
 	options := c.Options
 	var conn *zk.Conn
 	if len(options) > 0 {
-		cf := NewConfig(strings.Split(options[0], ","))
+		cf := NewConfig(strings.Split(options[0], ","), false)
 		conn, err = cf.Connect()
 		if err != nil {
 			return err
