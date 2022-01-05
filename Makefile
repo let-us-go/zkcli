@@ -36,6 +36,7 @@ release-all:
 	@$(MAKE) release GOOS=linux   GOARCH=386
 	@$(MAKE) release GOOS=linux   GOARCH=arm64
 	@$(MAKE) release GOOS=darwin  GOARCH=amd64
+	@$(MAKE) release GOOS=darwin  GOARCH=arm64
 
 .PHONY: build
 build:
