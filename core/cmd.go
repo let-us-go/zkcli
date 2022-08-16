@@ -157,6 +157,44 @@ func (c *Cmd) delete() (err error) {
 	return
 }
 
+func (c *Cmd) deleteall() (err error) {
+	err = c.checkConn()
+	if err != nil {
+		return
+	}
+
+	p := "/"
+	options := c.Options
+	if len(options) > 0 {
+		p = options[0]
+	}
+	p = cleanPath(p)
+
+	children, _, err := c.Conn.Children(p)
+	if err != nil {
+		return
+	}
+
+	for _, child := range children {
+		path := fmt.Sprintf("%s/%s", p, child)
+		err = c.Conn.Delete(path, -1)
+		if err != nil {
+			return
+		}
+		fmt.Printf("Deleted %s\n", path)
+	}
+
+	err = c.Conn.Delete(p, -1)
+	if err != nil {
+		return
+	}
+	fmt.Printf("Deleted %s\n", p)
+
+	root, _ := splitPath(p)
+	suggestCache.del(root)
+	return
+}
+
 func (c *Cmd) close() (err error) {
 	err = c.checkConn()
 	if err != nil {
@@ -237,6 +275,8 @@ func (c *Cmd) run() (err error) {
 		return c.set()
 	case "delete":
 		return c.delete()
+	case "deleteall":
+		return c.deleteall()
 	case "close":
 		return c.close()
 	case "connect":
@@ -271,6 +311,7 @@ ls <path>
 create <path> [<data>]
 set <path> [<data>]
 delete <path>
+deleteall <path>
 connect <host:port>
 addauth <scheme> <auth>
 close

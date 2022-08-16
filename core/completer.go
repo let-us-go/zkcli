@@ -14,6 +14,7 @@ var commands = []prompt.Suggest{
 	{Text: "create", Description: "Create a node"},
 	{Text: "set", Description: "Update a node"},
 	{Text: "delete", Description: "Delete a node"},
+	{Text: "deleteall", Description: "Delete a node recursively"},
 	{Text: "close", Description: "Close connection"},
 	{Text: "connect", Description: "Connect servers"},
 	{Text: "addauth", Description: "Add auth info"},
@@ -39,7 +40,7 @@ func argumentsCompleter(args []string, cmd *Cmd) []prompt.Suggest {
 
 	first := args[0]
 	switch first {
-	case "get", "ls", "create", "set", "delete":
+	case "get", "ls", "create", "set", "delete", "deleteall":
 		p := args[1]
 		if len(args) > 2 {
 			switch first {
