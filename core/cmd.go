@@ -168,6 +168,18 @@ func (c *Cmd) deleteall() (err error) {
 	if len(options) > 0 {
 		p = options[0]
 	}
+
+	err = c.deleteallRecursive(p)
+	if err != nil {
+		return
+	}
+
+	root, _ := splitPath(p)
+	suggestCache.del(root)
+	return
+}
+
+func (c *Cmd) deleteallRecursive(p string) (err error) {
 	p = cleanPath(p)
 
 	children, _, err := c.Conn.Children(p)
@@ -179,9 +191,17 @@ func (c *Cmd) deleteall() (err error) {
 		path := fmt.Sprintf("%s/%s", p, child)
 		err = c.Conn.Delete(path, -1)
 		if err != nil {
-			return
+			if err.Error() == "zk: node has children" {
+				err = c.deleteallRecursive(path)
+				if err != nil {
+					return err
+				}
+			} else {
+				return
+			}
+		} else {
+			fmt.Printf("Deleted %s\n", path)
 		}
-		fmt.Printf("Deleted %s\n", path)
 	}
 
 	err = c.Conn.Delete(p, -1)
@@ -190,8 +210,6 @@ func (c *Cmd) deleteall() (err error) {
 	}
 	fmt.Printf("Deleted %s\n", p)
 
-	root, _ := splitPath(p)
-	suggestCache.del(root)
 	return
 }
 
